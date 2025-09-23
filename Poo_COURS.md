@@ -45,12 +45,6 @@ Contrairement au procédural qui sépare **données** et **fonctions**, la POO o
 
 Le polymorphisme dynamique en Java se résout à l'exécution. Cela signifie que le type réel de l'objet détermine quelle méthode est appelée, même si la variable de référence est de type parent.
 
-**Exemple :**
-
-```java
-Animal a = new Chien();
-a.crier(); // Affiche "Wouf!" à l'exécution
-
 
 
 # 3. Classes, Objets et Conception
