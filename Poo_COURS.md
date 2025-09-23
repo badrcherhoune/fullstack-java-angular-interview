@@ -98,16 +98,6 @@ Le polymorphisme dynamique en Java se résout à l'exécution. Cela signifie que
 - Une classe qui ne peut avoir qu’une seule instance.  
 - Implémentation classique :  
 
-```java
-public class Singleton {
-    private static final Singleton INSTANCE = new Singleton();
-
-    private Singleton() {}
-
-    public static Singleton getInstance() {
-        return INSTANCE;
-    }
-}
 
 # Java - Gestion de mémoire & Modélisation
 
@@ -154,10 +144,6 @@ Java passe toujours une **copie de la valeur** :
 - **Cohésion forte** : chaque classe fait une seule chose de manière claire et complète.
 
 ### Héritage mal utilisé
-Exemple classique :
-```java
-class Rectangle { ... }
-class Carre extends Rectangle { ... } // Violation LSP si Carre ne se comporte pas comme Rectangle
 
 
 # Java - Patterns, POO Avancée et Cas Pratiques
