@@ -1,81 +1,136 @@
-# 🚀 Nouveautés de Java (LTS)
+# 🚀 Nouveautés de Java 21 (LTS)
 
 Java publie une nouvelle version **tous les 6 mois** et une version **LTS (Long-Term Support)** tous les 2 ans.  
 Les versions **Java 17 (2021)** et **Java 21 (2023)** sont les deux plus récentes LTS.
 
----
+## 1. Record Patterns (finalisés)
 
-## 🟢 Java 17 (LTS – 21 septembre 2021)
+➡️ Permettent de déstructurer facilement des objets records dans des conditions if ou des switch.
 
-### 🔑 Principales nouveautés
-1. **Pattern Matching for Switch (Preview)** – switch plus expressif et flexible.
-2. **Sealed Classes** – contrôle des classes qui peuvent hériter.
-3. **Always-Strict Floating-Point Semantics** – cohérence des calculs flottants.
-4. **Enhanced Random Number Generators** – nouveaux PRNG modernes.
-5. **Strong Encapsulation of JDK Internals** – sécurité accrue.
-6. **Foreign Function & Memory API (Incubator)** – accès simplifié au code natif.
-7. **Vector API (Incubator)** – calculs vectoriels optimisés.
-8. **Context-Specific Deserialization Filters** – sécurité renforcée.
-9. **Rendu Metal sur macOS** – remplace OpenGL.
-10. **Support macOS/AArch64 (Apple Silicon)** – optimisation ARM 64 bits.
+Exemple :
+```java
+record Point(int x, int y) {}
 
-### 🧹 Nettoyage
-- Suppression de **Applet API**, **RMI Activation**, **AOT/JIT expérimental**.
-- **Security Manager** marqué pour suppression.
+static void print(Object obj) {
+    if (obj instanceof Point(int x, int y)) {
+        System.out.println("x = " + x + ", y = " + y);
+    }
+}
+```
 
----
 
-## 🔵 Java 21 (LTS – 19 septembre 2023)
+👉 Ici, x et y sont directement extraits du record sans avoir à appeler point.x() ou point.y().
 
-### 🔑 Principales nouveautés
-1. **Record Patterns**  
-   - Déstructuration d’objets avec `record` dans les `switch` et `instanceof`.
+## 2. Pattern Matching for switch (finalisé)
 
-2. **Pattern Matching for Switch (Final)**  
-   - Finalisation de la fonctionnalité introduite en preview dans Java 17.
+➡️ Tu peux utiliser le pattern matching directement dans les switch, rendant le code plus expressif.
 
-3. **Virtual Threads (Project Loom)**  
-   - Des **milliers de threads légers** avec une consommation mémoire minimale.  
-   - Simplifie la gestion de la concurrence.
+Exemple :
+```java
+static String format(Object obj) {
+    return switch (obj) {
+        case Integer i -> "Int: " + i;
+        case String s  -> "String: " + s.toUpperCase();
+        case null      -> "Null value";
+        default        -> "Unknown type";
+    };
+}
+```
 
-4. **Sequenced Collections**  
-   - Nouvelle API garantissant l’ordre (listes, sets, maps séquencés).
+👉 Plus besoin de instanceof et de cast manuel, tout est géré par le compilateur.
 
-5. **String Templates (Preview)**  
-   - Nouvelle syntaxe pour interpoler des variables dans une chaîne :  
-     ```java
-     String name = "Badr";
-     String msg = STR."Bonjour, \{name}!";
-     ```
+## 3. Sequenced Collections (nouvelle API)
 
-6. **Unnamed Classes and Instance Main Methods (Preview)**  
-   - Permet d’écrire un programme **sans classe explicite** (plus simple pour débutants).  
-     ```java
-     void main() {
-         System.out.println("Hello World!");
-     }
-     ```
+➡️ Nouvelle interface commune (SequencedCollection) pour les collections avec un ordre défini (comme List, LinkedHashSet, TreeMap, etc.)
 
-7. **Foreign Function & Memory API (Final)**  
-   - Version stable de l’API incubée en Java 17.
+Exemple :
+```java
+SequencedSet<String> names = new LinkedHashSet<>();
+names.add("Badr");
+names.add("Cherhoune");
+System.out.println(names.getFirst()); // Badr
+System.out.println(names.getLast());  // Cherhoune
+```
 
-8. **Vector API (Incubator - 6e itération)**  
-   - Optimisations supplémentaires pour calculs vectoriels.
+👉 Cela simplifie la manipulation des collections ordonnées.
 
-### 🧹 Nettoyage
-- Suppression définitive du **Security Manager**.
-- Suppression de certaines API obsolètes.
+## 4. Virtual Threads (Project Loom) – Finalisé
 
----
+➡️ Révolutionnaire ! Permet de créer des milliers de threads légers sans saturer la JVM.
+Très utile pour les serveurs web et les traitements concurrents.
 
-## 📌 Pourquoi ces versions sont importantes ?
+Exemple :
+```java
+Thread.startVirtualThread(() -> {
+    System.out.println("Exécution dans un thread virtuel !");
+});
+```
 
-- **Java 17 (LTS)** : Base stable et sécurisée (support long terme jusqu’en 2029+).
-- **Java 21 (LTS)** : Nouvelle référence pour les projets modernes.  
-  - Virtual Threads = révolution pour la programmation concurrente.  
-  - Simplification du langage pour les débutants.  
-  - Améliorations de performance et sécurité.
+👉 Beaucoup plus efficace que les threads classiques — idéals pour les applications web ou microservices.
 
----
+## 5. Scoped Values (incubation)
 
-✍️ Basé sur les [JEPs officiels Java 17](https://openjdk.org/projects/jdk/17/) et [JEPs Java 21](https://openjdk.org/projects/jdk/21/).
+➡️ Alternative moderne aux ThreadLocal, pour partager des données de manière immuable et sûre entre threads.
+
+Exemple :
+```java
+import java.lang.ScopedValue;
+
+static final ScopedValue<String> USER = ScopedValue.newInstance();
+
+ScopedValue.where(USER, "Badr").run(() -> {
+    System.out.println("Utilisateur : " + USER.get());
+});
+```
+
+👉 Plus performant et sécurisé que ThreadLocal.
+
+## 6. Unnamed Classes & Instance Main Methods (preview)
+
+➡️ Simplifie l’écriture de programmes Java simples (utile pour l’apprentissage, scripts, etc.)
+
+Exemple :
+```java
+void main() {
+    System.out.println("Hello, Java 21!");
+}
+```
+
+👉 Plus besoin de public class Main ou public static void main(String[] args).
+
+## 7. Key Encapsulation Mechanism (KEM API)
+
+➡️ Nouvelle API pour gérer le chiffrement post-quantique, ajoutée dans java.security pour préparer l’avenir de la cryptographie.
+
+## 8. String Templates (preview)
+
+➡️ Permettent d’insérer des variables directement dans les chaînes de manière sécurisée.
+
+Exemple :
+```java
+String name = "Badr";
+String message = STR."Hello, \{name}!";
+System.out.println(message); // Hello, Badr!
+```
+
+👉 Plus simple et lisible que la concaténation classique.
+
+## 9. Foreign Function & Memory API (finalisée)
+
+➡️ Permet d’interagir avec du code natif (C/C++) sans JNI, plus rapide et plus sûr.
+
+Exemple :
+```java
+import java.lang.foreign.*;
+
+try (Arena arena = Arena.openConfined()) {
+    MemorySegment segment = arena.allocate(100);
+    // Manipulation mémoire sûre et rapide
+}
+```
+
+## 10. Deprecations et suppressions notables
+
+Suppression de certaines méthodes obsolètes de SecurityManager
+
+Avancée vers la disparition de Finalization (remplacée par Cleaner)
