@@ -1,69 +1,129 @@
-# 🚀 Nouveautés de Java 17 (LTS)
+# 🧩 Nouveautés de Java 17
 
-Java 17 est une **version LTS (Long-Term Support)** publiée le **21 septembre 2021**.  
-Elle apporte des améliorations majeures au niveau du langage, de la sécurité et des performances.
+## 1. Sealed Classes and Interfaces (Classes scellées)
 
----
+➡️ Permettent de restreindre quelles classes peuvent hériter d’une classe ou implémenter une interface.
 
-## 🔑 Principales nouveautés
+### Exemple :
 
-### 1. Pattern Matching for Switch (Preview)
-- Permet d’utiliser des motifs (`pattern matching`) dans les instructions `switch`.
-- Plus expressif et plus flexible avec **guarded patterns** et **patterns parenthésés**.
+```java
+public sealed class Shape permits Circle, Rectangle {}
 
-### 2. Sealed Classes
-- Limite quelles classes peuvent hériter ou implémenter une classe/interface.
-- Améliore la **sécurité** et la **lisibilité** des hiérarchies de classes.
+final class Circle extends Shape {}
+final class Rectangle extends Shape {}
+```
+👉 Ici, seules Circle et Rectangle peuvent hériter de Shape.
+Si tu essayes d’ajouter une autre classe (ex : Triangle), tu auras une erreur de compilation.
 
-### 3. Always-Strict Floating-Point Semantics
-- Les opérations en **virgule flottante** sont toujours strictes.
-- Garantit une cohérence entre plateformes.
+## 2. Pattern Matching for instanceof (Java 16 → finalisé dans 17)
 
-### 4. Enhanced Pseudo-Random Number Generators
-- Nouveaux algorithmes pour générer des nombres aléatoires.
-- Support natif pour les **streams** de nombres aléatoires.
+➡️ Simplifie la vérification du type et le cast automatique.
 
-### 5. Strongly Encapsulated JDK Internals
-- Les API internes du JDK sont fortement encapsulées.
-- Améliore la **sécurité** et la **modularité**.
+Exemple :
+```java
+Object obj = "Hello Java 17";
 
-### 6. Foreign Function & Memory API (Incubator)
-- Nouvelle API pour interagir avec du **code natif** (remplaçant JNI).
-- Simplifie l'accès à la mémoire hors JVM.
+if (obj instanceof String s) {
+    System.out.println(s.toUpperCase()); // plus besoin de cast explicite
+}
+```
 
-### 7. Vector API (Second Incubator)
-- Optimise les calculs vectoriels avec instructions CPU.
-- Utile pour **traitement numérique** et **machine learning**.
+👉 Avant : if (obj instanceof String) { String s = (String) obj; ... }
 
-### 8. Context-Specific Deserialization Filters
-- Ajout de filtres de **désérialisation contextuels**.
-- Réduit les risques de failles de sécurité.
+## 3. Records (finalisé dans Java 16 mais inclus dans 17 LTS)
 
-### 9. Nouveaux pipelines de rendu (macOS)
-- Utilisation de **Metal** au lieu de **OpenGL** pour Java 2D.
-- Optimisé pour macOS.
+➡️ Une syntaxe simple pour créer des classes immuables destinées à transporter des données.
 
-### 10. Portage macOS/AArch64
-- Support natif pour **Apple Silicon (M1, M2)**.
-- Meilleures performances sur Mac ARM 64 bits.
+Exemple :
+```java
+public record Person(String name, int age) {}
 
----
+class Test {
+    public static void main(String[] args) {
+        Person p = new Person("Badr", 30);
+        System.out.println(p.name()); // "Badr"
+        System.out.println(p);        // "Person[name=Badr, age=30]"
+    }
+}
+```
 
-## 🧹 Nettoyage et suppressions
+👉 Équivaut à une classe avec :
 
-- **Applet API** → obsolète et supprimée.
-- **RMI Activation** → supprimé.
-- **Experimental AOT/JIT Compiler** → retirés.
-- **Security Manager** → marqué pour suppression.
+un constructeur,
+des getters,
+equals(), hashCode(), et toString() auto-générés.
 
----
+## 4. New Pseudo-Random Number Generators (PRNG)
 
-## 📌 Pourquoi Java 17 est important ?
+➡️ Nouvelle API pour des générateurs de nombres aléatoires plus flexibles.
 
-- Version **LTS** (support long terme).
-- Améliorations en **sécurité**, **performance** et **productivité**.
-- Base solide pour les applications modernes.
+Exemple :
+```java
+import java.util.random.RandomGenerator;
+import java.util.random.RandomGeneratorFactory;
 
----
+public class RandomExample {
+    public static void main(String[] args) {
+        RandomGenerator generator = RandomGeneratorFactory.of("L64X128MixRandom").create();
+        System.out.println(generator.nextInt(100));
+    }
+}
+```
 
-✍️ Inspiré des [JEPs officiels](https://openjdk.org/projects/jdk/17/) et de la documentation Java.
+👉 Permet de choisir différents algorithmes (LXM, Xoroshiro, etc.).
+
+## 5. New macOS Rendering Pipeline (JEP 382)
+
+➡️ Nouveau pipeline basé sur Metal pour améliorer les performances graphiques sur macOS (remplace OpenGL).
+(Pas visible dans le code, mais amélioration interne du JDK.)
+
+## 6. Deprecation and Removal
+
+Certaines anciennes fonctionnalités ont été supprimées :
+Applet API (obsolète)
+RMI Activation System
+Experimental AOT and JIT compiler removed
+
+. Text Blocks (introduit en Java 15, présent en 17 LTS)
+
+➡️ Facilite l’écriture de chaînes multilignes lisibles.
+
+Exemple :
+String json = """
+    {
+        "name": "Badr",
+        "role": "Developer"
+    }
+    """;
+System.out.println(json);
+
+
+👉 Meilleure lisibilité que les chaînes avec \n partout.
+
+## 8. Switch Expressions (Java 14, stabilisé dans 17 LTS)
+
+➡️ Permet de retourner une valeur directement à partir d’un switch.
+
+Exemple :
+```java
+String day = "MONDAY";
+int num = switch (day) {
+    case "MONDAY", "TUESDAY" -> 1;
+    case "WEDNESDAY" -> 2;
+    default -> 0;
+};
+System.out.println(num); // 1
+```
+
+## 9. Foreign Function & Memory API (Incubating)
+
+➡️ Nouvelle API pour interagir avec le code natif sans JNI (encore en phase expérimentale dans Java 17).
+
+Exemple (simplifié) :
+```java
+// Exemple conceptuel
+try (var session = MemorySession.openConfined()) {
+    var segment = MemorySegment.allocateNative(100, session);
+    // interaction mémoire native
+}
+```
